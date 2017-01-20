@@ -12,6 +12,7 @@
       </div>
       <p>
         <b>APP_ID:</b> {APP_ID} |
+        <b>{WHOAMI}</b> |
         <b>INSTANCE_ID:</b> {INSTANCE_ID.substring(0,5)+"..."} |
         <b>COMMIT_ID:</b> {COMMIT_ID.substring(0,5)+"..."}
       </p>
@@ -30,13 +31,66 @@
 
   <script>
 
-    const source = new EventSource('/instance/informations');
-
     this.opts.broker.observe(this)
 
-    source.addEventListener('message', (event) => {
+    this.APP_ID = "🕓";
+    this.INSTANCE_ID = "🕖";
+    this.INSTANCE_TYPE = "🕦";
+    this.COMMIT_ID = "🕡";
+    this.INSTANCE_NUMBER = "🕙";
+    this.WHOAMI = "🕚";
+    this.d = "🕟";
 
-      const informations = JSON.parse(event.data);
+
+    updateApplicationInformations() {
+      fetch('/terra/env/vars', {
+        method: 'GET',
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => response.json())
+      .then(informations => {
+
+        if(this.COMMIT_ID !== informations.COMMIT_ID) {
+          this.opts.broker.emit("app:change:COMMIT_ID", {
+            old_commit_id: this.COMMIT_ID,
+            new_commit_id: informations.COMMIT_ID
+          });
+        }
+
+        if(this.INSTANCE_ID !== informations.INSTANCE_ID) {
+          this.opts.broker.emit("app:change:INSTANCE_ID", {
+            old_instance_id: this.INSTANCE_ID,
+            new_instance_id: informations.INSTANCE_ID
+          });
+        }
+
+        if(this.WHOAMI !== informations.WHOAMI) {
+          this.opts.broker.emit("app:change:WHOAMI", {
+            old_whoami_id: this.WHOAMI,
+            new_whoami_id: informations.WHOAMI
+          });
+        }
+
+        // try with https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
+        // Object.assign()
+        this.APP_ID = informations.APP_ID;
+        this.INSTANCE_ID = informations.INSTANCE_ID;
+        this.INSTANCE_TYPE = informations.INSTANCE_TYPE;
+        this.COMMIT_ID = informations.COMMIT_ID;
+        this.INSTANCE_NUMBER = informations.INSTANCE_NUMBER;
+        this.WHOAMI = informations.WHOAMI;
+        this.d = informations.d;
+
+        this.update()
+
+      })
+      .catch(error => console.error(error))
+    }
+
+    const timer = setInterval(this.updateApplicationInformations, 1000)
+
       /*
       if(this.COMMIT_ID !== informations.COMMIT_ID && this.message == "") {
         this.message = "⚠️ new application deployed!"
@@ -44,8 +98,15 @@
       TODO: try something with on change or with the broker
       */
 
+
+    /* SSE
+    const source = new EventSource('/instance/informations');
+    source.addEventListener('message', (event) => {
+
+      const informations = JSON.parse(event.data);
+
       //console.log("🐼", informations);
-      this.APP_ID =  informations.APP_ID;
+      this.APP_ID = informations.APP_ID;
       this.INSTANCE_ID = informations.INSTANCE_ID;
       this.INSTANCE_TYPE = informations.INSTANCE_TYPE;
       this.COMMIT_ID = informations.COMMIT_ID;
@@ -66,6 +127,7 @@
         // Connection was closed.
       }
     }, false);
+    */
   </script>
 
 </application-informations>

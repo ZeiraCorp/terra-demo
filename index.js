@@ -138,6 +138,21 @@ app.get('/gateways/:gateway_id/sensors/humidity/:sensor_id', (req, res) => {
 
 });
 
+// Expose env data
+app.get('/terra/env/vars', (req, res) => {
+  const d = new Date();
+  res.send({
+      APP_ID: process.env.APP_ID || "APP_ID",
+      INSTANCE_ID: process.env.INSTANCE_ID || "INSTANCE_ID",
+      INSTANCE_TYPE: process.env.INSTANCE_TYPE || "INSTANCE_TYPE",
+      COMMIT_ID: process.env.COMMIT_ID || "COMMIT_ID",
+      INSTANCE_NUMBER: process.env.INSTANCE_NUMBER || "INSTANCE_NUMBER",
+      d: d.getMilliseconds(),
+      WHOAMI: process.env.WHOAMI || "🤖"
+  })
+});
+
+
 // +++++++++++ SSE Experiments +++++++++++
 
 const openConnections = []
