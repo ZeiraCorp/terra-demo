@@ -152,6 +152,14 @@ app.get('/terra/env/vars', (req, res) => {
   })
 });
 
+// deployment hook
+app.post('/deploy', (req, res) => {
+  console.log("🎃", req.body)
+
+  res.status(201).end();
+  r//es.send({})
+});
+
 
 // +++++++++++ SSE Experiments +++++++++++
 
